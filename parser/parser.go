@@ -10,7 +10,7 @@ import (
 type Type string
 
 const (
-	TypeFuncInvocation = Type("funcinvocation")
+	TypeList = Type("list")
 	TypeString = Type("string")
 	TypeInt = Type("int")
 	TypeSymbol = Type("symbol")
@@ -28,15 +28,17 @@ type Node struct {
 
 func (n Node) NodePprint() {
 	switch n.Type {
-	case TypeFuncInvocation:
-		fmt.Printf("(%s ", n.Name)
+	case TypeList:
+		fmt.Print("(")
 		for i, n := range n.Nested {
 			if i != 0 {
 				fmt.Printf(" ")
 			}
 			n.NodePprint()
 		}
-		fmt.Printf(")")
+		fmt.Print(")")
+	case TypeSymbol:
+		fmt.Print(n.Name)
 	default:
 		fmt.Print(n.Data)
 	}
@@ -67,36 +69,31 @@ func Parse(tokens *channel.PeekableChannel) (Node) {
 		fmt.Println("handling token ", token)
 		switch  {
 		case token == "(":
-			funcName, found := tokens.Receive()
-			expectFound(found)
-			fmt.Println("detected func", funcName)
-
-			params := []Node{}
+			fmt.Println("STARTING LIST HANDLING")
+			elements := []Node{}
 			for {
 				val, found := tokens.Peek()
 				expectFound(found)
-				fmt.Println("peeked val", val)
+				fmt.Println("got val", val)
 				if val == ")" {
+					fmt.Println("detected ), breaking")
+					tokens.Receive() // purge the )
 					break
 				}
 
-				{
-				val, found := tokens.Peek()
-				fmt.Println("peeked val", val)
-				expectFound(found)
-				}
+				newEl := Parse(tokens)
 
-				newParam := Parse(tokens)
-
-				params = append(params, newParam)
+				elements = append(elements, newEl)
 			}
 
+			fmt.Println("ENDING LIST HANDLING")
 			return Node{
-				Type:     TypeFuncInvocation,
-				Name: funcName,
-				Data:     nil,
-				Nested:   params,
+				Type:     TypeList,
+				Nested:   elements,
 			}
+
+		case token == ")":
+			panic("should never happen")
 
 		case IsStr(token):
 			return Node{

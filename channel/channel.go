@@ -1,6 +1,7 @@
 package channel
 
 import (
+	"fmt"
 	"sync"
 )
 
@@ -29,7 +30,10 @@ func (p *PeekableChannel) Receive() (val string, available bool) {
 	}
 
 	res := p.buffer[0]
+
+	fmt.Println("before", p.buffer)
 	p.buffer = p.buffer[1:]
+	fmt.Println("after", p.buffer)
 	return res, true
 
 }

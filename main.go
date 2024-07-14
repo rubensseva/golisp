@@ -11,7 +11,7 @@ import (
 )
 
 func main() {
-	b := bytes.NewReader([]byte("(println (+ (/ 120   300) (- 100 30)))"))
+	b := bytes.NewReader([]byte("(println (+ 1 2 (/ 1 2) (- 2 (* 4 3 2)) 5))"))
 
 
 	var wg sync.WaitGroup
