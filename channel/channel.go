@@ -32,6 +32,9 @@ func (p *PeekableChannel) Receive() (val string, available bool) {
 	res := p.buffer[0]
 
 	fmt.Println("before", p.buffer)
+	for _, el := range p.buffer {
+		fmt.Println(el)
+	}
 	p.buffer = p.buffer[1:]
 	fmt.Println("after", p.buffer)
 	return res, true

@@ -14,20 +14,23 @@ func tokenize(str string, cout *channel.PeekableChannel) {
 	str = strings.Trim(str, " ")
 
 	prevI := 0
-	prevSpace := false
+	skipSpace := false
 
 	for i, r := range str {
 		// If we previously encountered whitespace, skip
 		// until we dont encounter more whitespace
-		if prevSpace {
+		if skipSpace {
 			if r == ' ' {
 				continue
 			}
 			prevI = i
-			prevSpace = false
+			skipSpace = false
 		}
 
 		if slices.Contains([]rune{')', '('}, r) {
+			if r == ')' {
+				skipSpace = true
+			}
 			if i > prevI {
 				cout.Send(str[prevI:i])
 			}
@@ -37,7 +40,7 @@ func tokenize(str string, cout *channel.PeekableChannel) {
 		}
 		if r == ' ' {
 			cout.Send(str[prevI:i])
-			prevSpace = true
+			skipSpace = true
 			continue
 		}
 	}

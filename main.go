@@ -11,7 +11,7 @@ import (
 )
 
 func main() {
-	b := bytes.NewReader([]byte("(println (+ 1 2 (/ 1 2) (- 2 (* 4 3 2)) 5))"))
+	b := bytes.NewReader([]byte("(+ 1 (+ 4 4) 2)"))
 
 
 	var wg sync.WaitGroup
@@ -30,6 +30,8 @@ func main() {
 		fmt.Printf("%+v\n", n)
 		n.NodePprint()
 		fmt.Println()
+
+		fmt.Println(parser.Eval(n))
 		time.Sleep(time.Second * 10)
 	}()
 
