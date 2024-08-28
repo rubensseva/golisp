@@ -6,7 +6,7 @@ import (
 )
 
 type PeekableChannel struct {
-	mutex sync.Mutex
+	mutex  sync.Mutex
 	buffer []string
 }
 

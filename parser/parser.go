@@ -10,10 +10,11 @@ import (
 type Type string
 
 const (
-	TypeList = Type("list")
+	TypeList   = Type("list")
 	TypeString = Type("string")
-	TypeInt = Type("int")
+	TypeInt    = Type("int")
 	TypeSymbol = Type("symbol")
+	TypeBool   = Type("bool")
 )
 
 type Node struct {
@@ -44,7 +45,6 @@ func (n Node) NodePprint() {
 	}
 }
 
-
 func IsStr(str string) bool {
 	return strings.HasPrefix(str, "\"") && strings.HasSuffix(str, "\"")
 }
@@ -60,14 +60,14 @@ func expectFound(found bool) {
 	}
 }
 
-func Parse(tokens *channel.PeekableChannel) (Node) {
+func Parse(tokens *channel.PeekableChannel) Node {
 	for {
 		token, found := tokens.Receive()
 		if !found {
 			break
 		}
 		fmt.Println("handling token ", token)
-		switch  {
+		switch {
 		case token == "(":
 			fmt.Println("STARTING LIST HANDLING")
 			elements := []Node{}
@@ -88,8 +88,8 @@ func Parse(tokens *channel.PeekableChannel) (Node) {
 
 			fmt.Println("ENDING LIST HANDLING")
 			return Node{
-				Type:     TypeList,
-				Nested:   elements,
+				Type:   TypeList,
+				Nested: elements,
 			}
 
 		case token == ")":
@@ -108,9 +108,21 @@ func Parse(tokens *channel.PeekableChannel) (Node) {
 				Data: n,
 			}
 
+		case token == "true" || token == "false":
+			if token == "true" {
+				return Node{
+					Type: TypeBool,
+					Data: true,
+				}
+			}
+			return Node{
+				Type: TypeBool,
+				Data: false,
+			}
+
 		default:
 			return Node{
-				Type:     TypeSymbol,
+				Type: TypeSymbol,
 				Name: token,
 			}
 		}

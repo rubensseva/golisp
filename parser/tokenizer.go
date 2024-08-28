@@ -2,10 +2,10 @@ package parser
 
 import (
 	"fmt"
+	"golisp/channel"
 	"io"
 	"slices"
 	"strings"
-	"golisp/channel"
 )
 
 var delims = []rune{'(', ')'}
@@ -46,9 +46,7 @@ func tokenize(str string, cout *channel.PeekableChannel) {
 	}
 }
 
-
-
-func Tokenize(in io.Reader, cout *channel.PeekableChannel) (error) {
+func Tokenize(in io.Reader, cout *channel.PeekableChannel) error {
 	data, err := io.ReadAll(in)
 	if err != nil {
 		return fmt.Errorf("reading all: %w", err)
@@ -57,4 +55,3 @@ func Tokenize(in io.Reader, cout *channel.PeekableChannel) (error) {
 	tokenize(string(data), cout)
 	return nil
 }
-

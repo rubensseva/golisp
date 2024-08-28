@@ -3,16 +3,15 @@ package main
 import (
 	"bytes"
 	"fmt"
-	"golisp/parser"
 	"golisp/channel"
+	"golisp/parser"
 	"log"
 	"sync"
 	"time"
 )
 
 func main() {
-	b := bytes.NewReader([]byte("(+ 1 (+ 4 4) 2)"))
-
+	b := bytes.NewReader([]byte("(+ 1 2)"))
 
 	var wg sync.WaitGroup
 	wg.Add(1)
@@ -21,7 +20,7 @@ func main() {
 		defer wg.Done()
 
 		cout := channel.NewPeekableChannel(1024)
-		err  := parser.Tokenize(b, cout)
+		err := parser.Tokenize(b, cout)
 		if err != nil {
 			log.Fatalln(err)
 		}
@@ -32,7 +31,7 @@ func main() {
 		fmt.Println()
 
 		fmt.Println(parser.Eval(n))
-		time.Sleep(time.Second * 10)
+		time.Sleep(time.Millisecond * 100)
 	}()
 
 	wg.Wait()
