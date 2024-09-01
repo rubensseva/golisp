@@ -7,7 +7,7 @@ import (
 func Eval(node Node) Node {
 	switch node.Type {
 	case TypeList:
-		// Get a refernce to the function symbol
+		// Get a reference to the function symbol
 		// In lisp this can be dynamically found so
 		// we need to eval to get it
 		f := Eval(node.Nested[0])
@@ -17,7 +17,7 @@ func Eval(node Node) Node {
 
 		fn, ok := fnMap()[f.Name]
 		if !ok {
-			panic(fmt.Sprintf("unknown symbol: %v", fn))
+			return dynamicBuiltin(f.Name, node.Nested[1:]...)
 		}
 
 		finalParams := node.Nested[1:]

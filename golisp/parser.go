@@ -16,15 +16,19 @@ const (
 	TypeInt    = Type("int")
 	TypeSymbol = Type("symbol")
 	TypeBool   = Type("bool")
+	TypeAny    = Type("any")
 )
 
 type Node struct {
 	Type Type
+	// Only present on functions and symbols
 	Name string
-	// Data contains the data AND the type
+
 	Data any
 
-	// Nested can be func params, or func invocation arguments
+	// Nested represents list data. Lists can represent function invocation, in
+	// that case the first element is the function name, and the rest are
+	// function params
 	Nested []Node
 }
 

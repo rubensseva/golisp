@@ -20,7 +20,7 @@ func main() {
 		runeReader := bufio.NewReader(os.Stdin)
 
 		for {
-			tokenizer := golisp.NewTokenizerv2(runeReader)
+			tokenizer := golisp.NewTokenizer(runeReader)
 
 			n := golisp.Parse(tokenizer)
 			fmt.Printf("%+v\n", n)

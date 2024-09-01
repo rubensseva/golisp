@@ -17,6 +17,8 @@ func fnMap() map[string]Builtin {
 		"cond":    {BuiltinCond, true},
 		"=":       {BuiltinEq, false},
 		"println": {BuiltinPrintln, false},
+
+		// "strings.split": {strings_split, false},
 	}
 }
 
