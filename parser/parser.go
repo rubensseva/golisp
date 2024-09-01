@@ -61,7 +61,7 @@ func expectFound(found bool) {
 	}
 }
 
-func Parse(tokenizer *Tokenizerv2) Node {
+func Parse(tokenizer *Tokenizer) Node {
 	for {
 		token, err := tokenizer.Token()
 		if err != nil {
