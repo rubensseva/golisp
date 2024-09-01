@@ -2,7 +2,8 @@ package parser
 
 import (
 	"fmt"
-	"golisp/channel"
+	// "golisp/parser"
+	"log"
 	"strconv"
 	"strings"
 )
@@ -60,33 +61,30 @@ func expectFound(found bool) {
 	}
 }
 
-func Parse(tokens *channel.PeekableChannel) Node {
+func Parse(tokenizer *Tokenizerv2) Node {
 	for {
-		token, found := tokens.Receive()
-		if !found {
-			break
+		token, err := tokenizer.Token()
+		if err != nil {
+			log.Fatalf("reading token: %v", err)
 		}
-		fmt.Println("handling token ", token)
 		switch {
 		case token == "(":
-			fmt.Println("STARTING LIST HANDLING")
 			elements := []Node{}
 			for {
-				val, found := tokens.Peek()
-				expectFound(found)
-				fmt.Println("got val", val)
+				val, err := tokenizer.Peek()
+				if err != nil {
+					log.Fatalf("peeking: %v", err)
+				}
 				if val == ")" {
-					fmt.Println("detected ), breaking")
-					tokens.Receive() // purge the )
+					tokenizer.Token() // purge the )
 					break
 				}
 
-				newEl := Parse(tokens)
+				newEl := Parse(tokenizer)
 
 				elements = append(elements, newEl)
 			}
 
-			fmt.Println("ENDING LIST HANDLING")
 			return Node{
 				Type:   TypeList,
 				Nested: elements,
