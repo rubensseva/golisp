@@ -1,4 +1,4 @@
-package parser
+package golisp
 
 import (
 	"fmt"
@@ -13,7 +13,7 @@ type Tokenizer struct {
 	tokenBuffer []string
 }
 
-func NewTokenizerv2(r io.RuneReader) *Tokenizer {
+func NewTokenizer(r io.RuneReader) *Tokenizer {
 	return &Tokenizer{
 		buffer:      []rune{},
 		r:           r,

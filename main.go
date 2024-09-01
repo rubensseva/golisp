@@ -3,10 +3,11 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"golisp/parser"
 	"os"
 	"sync"
 	"time"
+
+	"golisp/golisp"
 )
 
 func main() {
@@ -19,14 +20,14 @@ func main() {
 		runeReader := bufio.NewReader(os.Stdin)
 
 		for {
-			tokenizer := parser.NewTokenizerv2(runeReader)
+			tokenizer := golisp.NewTokenizerv2(runeReader)
 
-			n := parser.Parse(tokenizer)
+			n := golisp.Parse(tokenizer)
 			fmt.Printf("%+v\n", n)
 			n.NodePprint()
 			fmt.Println()
 
-			fmt.Println(parser.Eval(n))
+			fmt.Println(golisp.Eval(n))
 		}
 		time.Sleep(time.Millisecond * 100)
 	}()
