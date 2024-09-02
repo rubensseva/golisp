@@ -56,6 +56,7 @@ func (t *Tokenizer) Token() (string, error) {
 	}
 
 	atStart := true
+	isString := false
 	var token []rune
 	for {
 		r, err := t.peekRune()
@@ -70,6 +71,8 @@ func (t *Tokenizer) Token() (string, error) {
 			continue
 		}
 
+
+
 		// If the first thing we encounter (except for spaces) is a parenthesis,
 		// we consume and return it
 		if atStart && (r == '(' || r == ')') {
@@ -82,9 +85,36 @@ func (t *Tokenizer) Token() (string, error) {
 		// At this point we are no longer at the beginning
 		atStart = false
 
-		// This will never trigger at the start, because we already check for
-		// spaces, newlines and parenthesis. So if this condition passes, token
-		// is not empty
+		// Now we need to check if we are consuming a string token, in which
+		// case we should ignore delimiters inside the string token
+		if r == '"' && !isString {
+			fmt.Println("string detected")
+			isString = true
+			token = append(token, r)
+			if _, err := t.readRune(); err != nil {
+				return z, fmt.Errorf("consuming start \" of string: %w", err)
+			}
+			continue
+		}
+		if isString {
+			token = append(token, r)
+			fmt.Println("token is now", string(token))
+			// If we are inside the string, we need to consume a rune to get to
+			// the next one on the next iteration. If we are at the end of a
+			// string, meaning the peeked rune is == '"', then we also should
+			// consume a rune so that we dont encounter the " rune on the next
+			// run of the tokenizer
+			if _, err := t.readRune(); err != nil {
+				return z, fmt.Errorf("discarding a rune: %w", err)
+			}
+			if r == '"' {
+				fmt.Println("returning ", string(token))
+				return string(token), nil
+			}
+			continue
+		}
+
+		// Check for delimiters
 		if r == '(' || r == ')' || r == ' ' || r == '\n' {
 			return string(token), nil
 		}
