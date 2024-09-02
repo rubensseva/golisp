@@ -14,6 +14,45 @@ var dynamicFnMap = map[string]any{
 	"strings.to-lower": strings.ToLower,
 	"strings.to-upper": strings.ToUpper,
 	"strings.trim":     strings.Trim,
+
+	"strings.testfoo": TestFoo,
+}
+
+var dynamicStructMap = map[string]any{
+	"strings.foo": Foo{},
+}
+
+type Foo struct {
+	Bar string
+}
+
+func TestFoo(f Foo) string {
+	return f.Bar
+}
+
+func mapToStruct(m map[any]any, structInstance any) {
+	// Get the reflect.Type of the expected struct
+	structType := reflect.TypeOf(structInstance)
+
+	// Create a new instance of the struct
+	newStruct := reflect.New(structType).Elem()
+
+	// Iterate over the fields of the struct
+	for i := 0; i < newStruct.NumField(); i++ {
+		field := structType.Field(i)
+		fieldName := field.Name
+
+		// Check if the map has a value for this field
+		if value, ok := m[fieldName]; ok {
+			structField := newStruct.FieldByName(fieldName)
+
+			// Ensure the value from the map is assignable to the struct field
+			val := reflect.ValueOf(value)
+			if val.Type().AssignableTo(structField.Type()) {
+				structField.Set(val)
+			}
+		}
+	}
 }
 
 func dynamicBuiltin(name string, n ...Node) Node {
