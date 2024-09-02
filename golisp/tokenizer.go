@@ -4,11 +4,9 @@ import (
 	"io"
 )
 
-
-
 type Tokenizer struct {
-	buffer []rune
-	r      io.RuneReader
+	buffer      []rune
+	r           io.RuneReader
 	tokenBuffer []string
 }
 
@@ -56,8 +54,6 @@ func (t *Tokenizer) Token() string {
 			t.readRune()
 			continue
 		}
-
-
 
 		// If the first thing we encounter (except for spaces) is a parenthesis,
 		// we consume and return it

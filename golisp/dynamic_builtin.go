@@ -7,15 +7,14 @@ import (
 )
 
 var dynamicFnMap = map[string]any{
-	"strings.split": strings.Split,
-	"strings.split-n": strings.SplitN,
-	"strings.count": strings.Count,
-	"strings.replace": strings.Replace,
+	"strings.split":    strings.Split,
+	"strings.split-n":  strings.SplitN,
+	"strings.count":    strings.Count,
+	"strings.replace":  strings.Replace,
 	"strings.to-lower": strings.ToLower,
 	"strings.to-upper": strings.ToUpper,
-	"strings.trim": strings.Trim,
+	"strings.trim":     strings.Trim,
 }
-
 
 func dynamicBuiltin(name string, n ...Node) Node {
 	fn, ok := dynamicFnMap[name]
@@ -38,9 +37,9 @@ func dynamicBuiltin(name string, n ...Node) Node {
 	res := []Node{}
 	for _, r := range rres {
 		res = append(res, Node{
-			Type:   TypeAny,
+			Type: TypeAny,
 			// Name:   name,
-			Data:   r.Interface(),
+			Data: r.Interface(),
 		})
 	}
 
@@ -50,7 +49,7 @@ func dynamicBuiltin(name string, n ...Node) Node {
 	}
 }
 
-func strings_split (n ...Node) Node {
+func strings_split(n ...Node) Node {
 	if len(n) != 2 {
 		panic("split expects two strings")
 	}
@@ -67,9 +66,9 @@ func strings_split (n ...Node) Node {
 	res := []Node{}
 	for _, s := range strs {
 		res = append(res, Node{
-			Type:   TypeString,
+			Type: TypeString,
 			// Name:   "",
-			Data:   s,
+			Data: s,
 			// Nested: n,
 		})
 	}
