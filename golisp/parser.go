@@ -2,6 +2,7 @@ package golisp
 
 import (
 	"fmt"
+	"log"
 	// "golisp/parser"
 	"strconv"
 	"strings"
@@ -13,9 +14,13 @@ type Node struct {
 	// Only present on functions and symbols
 	Name string
 
+	// If this is true, then a []Node in the data fields represents a literal
+	// map instead of a list
+	IsLiteralMap bool
+
 	// Data contains the actual data, and type information in the form of
 	// the underlying Golang type.
-	// If its a []Node it represents a golisp lisp. Anything else is just a
+	// If its a []Node it represents a golisp literal list or map. Anything else is just a
 	// literal value.
 	// Lists ([]Node) can represent function invocation, in
 	// that case the first element is the function name, and the rest are
@@ -62,11 +67,19 @@ func Parse(tokenizer *Tokenizer) Node {
 	for {
 		token := tokenizer.Token()
 		switch {
-		case token == "(":
+		case token == "(" || token == "{":
+			isMap := false
+			if token == "{" {
+				isMap = true
+			}
+
 			elements := []Node{}
 			for {
 				val := tokenizer.Peek()
-				if val == ")" {
+				if val == ")" || val == "}" {
+					if isMap && val == ")" {
+						log.Fatalln("got ending of list wihle expecting ending of map")
+					}
 					tokenizer.Token() // purge the )
 					break
 				}
@@ -77,10 +90,11 @@ func Parse(tokenizer *Tokenizer) Node {
 			}
 
 			return Node{
-				Data: elements,
+				IsLiteralMap: isMap,
+				Data:         elements,
 			}
 
-		case token == ")":
+		case token == ")" || token == "}":
 			panic("should never happen")
 
 		case IsStr(token):

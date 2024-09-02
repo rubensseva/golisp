@@ -27,7 +27,7 @@ func main() {
 			n.NodePprint()
 			fmt.Println()
 
-			fmt.Println(golisp.Eval(n))
+			fmt.Printf("%+v\n", golisp.Eval(n))
 		}
 		time.Sleep(time.Millisecond * 100)
 	}()

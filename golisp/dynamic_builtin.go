@@ -110,6 +110,6 @@ func strings_split(n ...Node) Node {
 		})
 	}
 	return Node{
-		Nested: res,
+		Data: res,
 	}
 }

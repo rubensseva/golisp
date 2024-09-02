@@ -57,7 +57,7 @@ func (t *Tokenizer) Token() string {
 
 		// If the first thing we encounter (except for spaces) is a parenthesis,
 		// we consume and return it
-		if atStart && (r == '(' || r == ')') {
+		if atStart && (r == '(' || r == ')' || r == '{' || r == '}') {
 			t.readRune()
 			return string(r)
 		}
@@ -88,7 +88,7 @@ func (t *Tokenizer) Token() string {
 		}
 
 		// Check for delimiters
-		if r == '(' || r == ')' || r == ' ' || r == '\n' {
+		if r == '(' || r == ')' || r == '{' || r == '}' || r == ' ' || r == '\n' {
 			return string(token)
 		}
 
