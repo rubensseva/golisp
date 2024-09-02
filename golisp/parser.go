@@ -9,43 +9,37 @@ import (
 
 type Type string
 
-const (
-	TypeList   = Type("list")
-	TypeString = Type("string")
-	TypeInt    = Type("int")
-	TypeSymbol = Type("symbol")
-	TypeBool   = Type("bool")
-	TypeAny    = Type("any")
-)
-
 type Node struct {
-	Type Type
 	// Only present on functions and symbols
 	Name string
 
-	Data any
-
-	// Nested represents list data. Lists can represent function invocation, in
+	// Data contains the actual data, and type information in the form of
+	// the underlying Golang type.
+	// If its a []Node it represents a golisp lisp. Anything else is just a
+	// literal value.
+	// Lists ([]Node) can represent function invocation, in
 	// that case the first element is the function name, and the rest are
-	// function params
-	Nested []Node
+	// function params.
+	Data any
 }
 
 func (n Node) NodePprint() {
-	switch n.Type {
-	case TypeList:
-		fmt.Print("(")
-		for i, n := range n.Nested {
-			if i != 0 {
-				fmt.Printf(" ")
-			}
-			n.NodePprint()
-		}
-		fmt.Print(")")
-	case TypeSymbol:
+	if n.Name != "" {
 		fmt.Print(n.Name)
-	default:
-		fmt.Print(n.Data)
+	} else {
+		switch t := n.Data.(type) {
+		case []Node:
+			fmt.Print("(")
+			for i, n := range t {
+				if i != 0 {
+					fmt.Printf(" ")
+				}
+				n.NodePprint()
+			}
+			fmt.Print(")")
+		default:
+			fmt.Print(n.Data)
+		}
 	}
 }
 
@@ -83,8 +77,7 @@ func Parse(tokenizer *Tokenizer) Node {
 			}
 
 			return Node{
-				Type:   TypeList,
-				Nested: elements,
+				Data: elements,
 			}
 
 		case token == ")":
@@ -92,32 +85,27 @@ func Parse(tokenizer *Tokenizer) Node {
 
 		case IsStr(token):
 			return Node{
-				Type: TypeString,
 				Data: strings.Trim(token, "\""),
 			}
 
 		case IsInt(token):
 			n, _ := strconv.ParseInt(token, 10, 64)
 			return Node{
-				Type: TypeInt,
 				Data: n,
 			}
 
 		case token == "true" || token == "false":
 			if token == "true" {
 				return Node{
-					Type: TypeBool,
 					Data: true,
 				}
 			}
 			return Node{
-				Type: TypeBool,
 				Data: false,
 			}
 
 		default:
 			return Node{
-				Type: TypeSymbol,
 				Name: token,
 			}
 		}

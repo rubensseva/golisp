@@ -76,15 +76,13 @@ func dynamicBuiltin(name string, n ...Node) Node {
 	res := []Node{}
 	for _, r := range rres {
 		res = append(res, Node{
-			Type: TypeAny,
 			// Name:   name,
 			Data: r.Interface(),
 		})
 	}
 
 	return Node{
-		Type:   TypeList,
-		Nested: res,
+		Data: res,
 	}
 }
 
@@ -93,7 +91,8 @@ func strings_split(n ...Node) Node {
 		panic("split expects two strings")
 	}
 	for _, nn := range n {
-		if nn.Type != TypeString {
+		_, ok := nn.Data.(string)
+		if !ok {
 			panic("split expects all arguments to be strings")
 		}
 	}
@@ -105,14 +104,12 @@ func strings_split(n ...Node) Node {
 	res := []Node{}
 	for _, s := range strs {
 		res = append(res, Node{
-			Type: TypeString,
 			// Name:   "",
 			Data: s,
 			// Nested: n,
 		})
 	}
 	return Node{
-		Type:   TypeList,
 		Nested: res,
 	}
 }

@@ -5,22 +5,22 @@ import (
 )
 
 func Eval(node Node) Node {
-	switch node.Type {
-	case TypeList:
+	switch t := node.Data.(type) {
+	case []Node:
 		// Get a reference to the function symbol
 		// In lisp this can be dynamically found so
 		// we need to eval to get it
-		f := Eval(node.Nested[0])
-		if f.Type != TypeSymbol {
+		f := Eval(t[0])
+		if f.Name == "" {
 			panic(fmt.Sprintf("expected symbol, got: %+v", f))
 		}
 
 		fn, ok := fnMap()[f.Name]
 		if !ok {
-			return dynamicBuiltin(f.Name, node.Nested[1:]...)
+			return dynamicBuiltin(f.Name, t[1:]...)
 		}
 
-		finalParams := node.Nested[1:]
+		finalParams := t[1:]
 		if !fn.IsSpecial {
 			evaldParams := []Node{}
 			for _, p := range finalParams {
@@ -35,7 +35,5 @@ func Eval(node Node) Node {
 		// If its a int, string or other primitive, we
 		// just return it
 		return node
-
 	}
-
 }

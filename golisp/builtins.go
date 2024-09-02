@@ -29,14 +29,14 @@ func NodeField[T any](n Node) T {
 }
 
 func IsTrue(n Node) bool {
-	switch n.Type {
-	case TypeList:
-		return len(n.Nested) != 0
-	case TypeInt:
+	switch t := n.Data.(type) {
+	case []Node:
+		return len(t) != 0
+	case int, int32, int64:
 		return NodeField[int64](n) != 0
-	case TypeString:
+	case string:
 		return NodeField[string](n) != ""
-	case TypeBool:
+	case bool:
 		return NodeField[bool](n)
 	default:
 		panic(fmt.Sprintf("unrecognized type: %s", n))
@@ -44,11 +44,8 @@ func IsTrue(n Node) bool {
 }
 
 func Equal(nodes ...Node) bool {
-	fmt.Println("checking equal:", nodes)
 	prevVal := nodes[0].Data
 	for _, node := range nodes[1:] {
-		fmt.Println("checking val", prevVal, node.Data)
-		fmt.Printf("%T, %T\n", prevVal, node.Data)
 		if prevVal != node.Data {
 			return false
 		}
@@ -60,7 +57,6 @@ func Equal(nodes ...Node) bool {
 func BuiltinPlus(nodes ...Node) Node {
 	if len(nodes) == 0 {
 		return Node{
-			Type: TypeInt,
 			Data: int64(0),
 		}
 	}
@@ -70,7 +66,6 @@ func BuiltinPlus(nodes ...Node) Node {
 		sum += num
 	}
 	return Node{
-		Type: TypeInt,
 		Data: sum,
 	}
 }
@@ -78,7 +73,6 @@ func BuiltinPlus(nodes ...Node) Node {
 func BuiltinMinus(nodes ...Node) Node {
 	if len(nodes) == 0 {
 		return Node{
-			Type: TypeInt,
 			Data: int64(0),
 		}
 	}
@@ -88,14 +82,12 @@ func BuiltinMinus(nodes ...Node) Node {
 		res -= num
 	}
 	return Node{
-		Type: TypeInt,
 		Data: res,
 	}
 }
 
 func BuiltinEq(nodes ...Node) Node {
 	return Node{
-		Type: TypeBool,
 		Data: Equal(nodes...),
 	}
 }
