@@ -3,7 +3,6 @@ package golisp
 import (
 	"fmt"
 	// "golisp/parser"
-	"log"
 	"strconv"
 	"strings"
 )
@@ -67,18 +66,12 @@ func expectFound(found bool) {
 
 func Parse(tokenizer *Tokenizer) Node {
 	for {
-		token, err := tokenizer.Token()
-		if err != nil {
-			log.Fatalf("reading token: %v", err)
-		}
+		token := tokenizer.Token()
 		switch {
 		case token == "(":
 			elements := []Node{}
 			for {
-				val, err := tokenizer.Peek()
-				if err != nil {
-					log.Fatalf("peeking: %v", err)
-				}
+				val := tokenizer.Peek()
 				if val == ")" {
 					tokenizer.Token() // purge the )
 					break
