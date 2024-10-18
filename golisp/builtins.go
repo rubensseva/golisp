@@ -2,9 +2,10 @@ package golisp
 
 import (
 	"fmt"
+	"reflect"
 )
 
-type OpFn func(n ...Node) Node
+type OpFn func(n ...any) any
 type Builtin struct {
 	FN        OpFn
 	IsSpecial bool
@@ -20,18 +21,16 @@ func fnMap() map[string]Builtin {
 	}
 }
 
-func NodeField[T any](n Node) T {
-	val, ok := n.Data.(T)
+func NodeField[T any](n any) T {
+	val, ok := n.(T)
 	if !ok {
-		panic(fmt.Sprintf("tried to convert node data %+v, but it was %T", n, n.Data))
+		panic(fmt.Sprintf("tried to convert node data %+v, but it was %T", n, n))
 	}
 	return val
 }
 
-func IsTrue(n Node) bool {
-	switch t := n.Data.(type) {
-	case []Node:
-		return len(t) != 0
+func IsTrue(n any) bool {
+	switch n.(type) {
 	case int, int32, int64:
 		return NodeField[int64](n) != 0
 	case string:
@@ -39,60 +38,54 @@ func IsTrue(n Node) bool {
 	case bool:
 		return NodeField[bool](n)
 	default:
+		v := reflect.ValueOf(n)
+		if v.Kind() == reflect.Slice {
+			return v.Len() != 0 // Get the length of the slice using reflection
+		}
 		panic(fmt.Sprintf("unrecognized type: %s", n))
 	}
 }
 
-func Equal(nodes ...Node) bool {
-	prevVal := nodes[0].Data
+func Equal(nodes ...any) any {
+	prevVal := nodes[0]
 	for _, node := range nodes[1:] {
-		if prevVal != node.Data {
+		if prevVal != node {
 			return false
 		}
-		prevVal = node.Data
+		prevVal = node
 	}
 	return true
 }
 
-func BuiltinPlus(nodes ...Node) Node {
+func BuiltinPlus(nodes ...any) any {
 	if len(nodes) == 0 {
-		return Node{
-			Data: int64(0),
-		}
+		return 0
 	}
-	sum := int64(0)
+	sum := 0
 	for _, n := range nodes {
-		num := NodeField[int64](n)
+		num := NodeField[int](n)
 		sum += num
 	}
-	return Node{
-		Data: sum,
-	}
+	return sum
 }
 
-func BuiltinMinus(nodes ...Node) Node {
+func BuiltinMinus(nodes ...any) any {
 	if len(nodes) == 0 {
-		return Node{
-			Data: int64(0),
-		}
+		return 0
 	}
-	res := NodeField[int64](nodes[0])
+	res := NodeField[int](nodes[0])
 	for _, n := range nodes[1:] {
-		num := NodeField[int64](n)
+		num := NodeField[int](n)
 		res -= num
 	}
-	return Node{
-		Data: res,
-	}
+	return res
 }
 
-func BuiltinEq(nodes ...Node) Node {
-	return Node{
-		Data: Equal(nodes...),
-	}
+func BuiltinEq(nodes ...any) any {
+	return Equal(nodes...)
 }
 
-func BuiltinCond(nodes ...Node) Node {
+func BuiltinCond(nodes ...any) any {
 	if len(nodes)%2 != 0 {
 		panic("cond expects even number of arguments")
 	}
@@ -107,10 +100,10 @@ func BuiltinCond(nodes ...Node) Node {
 	panic(fmt.Sprintf("no conditions of cond was hit: %+v", nodes))
 }
 
-func BuiltinPrintln(nodes ...Node) Node {
+func BuiltinPrintln(nodes ...any) any {
 	for _, n := range nodes {
-		n.NodePprint()
+		NodePprint(n)
 	}
 	fmt.Println()
-	return Node{}
+	return nil
 }

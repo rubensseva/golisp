@@ -55,7 +55,7 @@ func mapToStruct(m map[any]any, structInstance any) {
 	}
 }
 
-func dynamicBuiltin(name string, n ...Node) Node {
+func dynamicBuiltin(name string, n ...any) any {
 	fn, ok := dynamicFnMap[name]
 	if !ok {
 		log.Fatalf("no dynamic builtin with name: %v", name)
@@ -73,20 +73,15 @@ func dynamicBuiltin(name string, n ...Node) Node {
 	log.Printf("calling: %+v, with args: %+v", fn, n)
 	rres := val.Call(args)
 
-	res := []Node{}
+	res := []any{}
 	for _, r := range rres {
-		res = append(res, Node{
-			// Name:   name,
-			Data: r.Interface(),
-		})
+		res = append(res, r.Interface())
 	}
 
-	return Node{
-		Data: res,
-	}
+    return res
 }
 
-func strings_split(n ...Node) Node {
+func strings_split(n ...any) any {
 	if len(n) != 2 {
 		panic("split expects two strings")
 	}

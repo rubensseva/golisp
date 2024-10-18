@@ -10,43 +10,36 @@ import (
 
 type Type string
 
-type Node struct {
-	// Only present on functions and symbols
-	Name string
+type LiteralMap []any
+type LiteralList []any
+type Symbol string
 
-	// If this is true, then a []Node in the data fields represents a literal
-	// map instead of a list
-	IsLiteralMap bool
+// type Primitive any
 
-	// Data contains the actual data, and type information in the form of
-	// the underlying Golang type.
-	// If its a []Node it represents a golisp literal list or map. Anything else is just a
-	// literal value.
-	// Lists ([]Node) can represent function invocation, in
-	// that case the first element is the function name, and the rest are
-	// function params.
-	Data any
-}
-
-func (n Node) NodePprint() {
-	if n.Name != "" {
-		fmt.Print(n.Name)
-	} else {
-		switch t := n.Data.(type) {
-		case []Node:
+func NodePprint(n any) {
+		switch t := n.(type) {
+		case LiteralList:
 			fmt.Print("(")
 			for i, n := range t {
 				if i != 0 {
 					fmt.Printf(" ")
 				}
-				n.NodePprint()
+				NodePprint(n)
+			}
+			fmt.Print(")")
+		case LiteralMap:
+			fmt.Print("(")
+			for i, n := range t {
+				if i != 0 {
+					fmt.Printf(" ")
+				}
+				NodePprint(n)
 			}
 			fmt.Print(")")
 		default:
-			fmt.Print(n.Data)
+			fmt.Print(t)
 		}
 	}
-}
 
 func IsStr(str string) bool {
 	return strings.HasPrefix(str, "\"") && strings.HasSuffix(str, "\"")
@@ -63,7 +56,7 @@ func expectFound(found bool) {
 	}
 }
 
-func Parse(tokenizer *Tokenizer) Node {
+func Parse(tokenizer *Tokenizer) any {
 	for {
 		token := tokenizer.Token()
 		switch {
@@ -73,7 +66,7 @@ func Parse(tokenizer *Tokenizer) Node {
 				isMap = true
 			}
 
-			elements := []Node{}
+			elements := LiteralList{}
 			for {
 				val := tokenizer.Peek()
 				if val == ")" || val == "}" {
@@ -89,39 +82,29 @@ func Parse(tokenizer *Tokenizer) Node {
 				elements = append(elements, newEl)
 			}
 
-			return Node{
-				IsLiteralMap: isMap,
-				Data:         elements,
+			if isMap {
+				return LiteralMap(elements)
 			}
+			return elements
 
 		case token == ")" || token == "}":
 			panic("should never happen")
 
 		case IsStr(token):
-			return Node{
-				Data: strings.Trim(token, "\""),
-			}
+		    return strings.Trim(token, "\"")
 
 		case IsInt(token):
-			n, _ := strconv.ParseInt(token, 10, 64)
-			return Node{
-				Data: n,
+			n, err := strconv.ParseInt(token, 10, 64)
+			if err != nil {
+				panic(err)
 			}
+			return n
 
 		case token == "true" || token == "false":
-			if token == "true" {
-				return Node{
-					Data: true,
-				}
-			}
-			return Node{
-				Data: false,
-			}
+			return token == "true"
 
 		default:
-			return Node{
-				Name: token,
-			}
+			return Symbol(token)
 		}
 	}
 
